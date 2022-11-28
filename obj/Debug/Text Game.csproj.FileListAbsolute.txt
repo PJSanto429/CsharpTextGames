@@ -1,0 +1,16 @@
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\bin\Debug\Text Game.exe.config
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\bin\Debug\Text Game.exe
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\bin\Debug\Text Game.pdb
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\obj\Debug\Text Game.csproj.AssemblyReference.cache
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\obj\Debug\Text Game.csproj.SuggestedBindingRedirects.cache
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\obj\Debug\Text Game.csproj.CoreCompileInputs.cache
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\obj\Debug\Text Game.exe
+C:\Users\peyto\Important stuff\programming\C#\Text Game\Text Game\obj\Debug\Text Game.pdb
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\bin\Debug\Text Game.exe.config
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\bin\Debug\Text Game.exe
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\bin\Debug\Text Game.pdb
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\obj\Debug\Text Game.csproj.AssemblyReference.cache
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\obj\Debug\Text Game.csproj.SuggestedBindingRedirects.cache
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\obj\Debug\Text Game.csproj.CoreCompileInputs.cache
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\obj\Debug\Text Game.exe
+C:\Users\peyto\Important stuff\programming\C#\CsharpTextGames\obj\Debug\Text Game.pdb
