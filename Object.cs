@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.PerformanceData;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using static Text_Game.Program;
+//using System.Diagnostics.PerformanceData;
+//using System.IO.MemoryMappedFiles;
+//using System.Runtime.CompilerServices;
+//using System.Security.Claims;
+//using System.Security.Cryptography.X509Certificates;
+//using System.Security.Policy;
+//using System.Text;
+//using System.Threading.Tasks;
 
 namespace Text_Game
 {
@@ -20,26 +23,9 @@ namespace Text_Game
         private string description;
         private bool takeable;
         public bool inInventory;
-        public string room;
+        public rooms room;
 
-        public Object(
-            string Aname,
-            string AlongName,
-            string Aroom,
-            string Adescription,
-            bool Atakeable,
-            bool AinInventory
-        )
-        {
-            instances.Add(this);
-            Name = Aname;
-            LongName = AlongName;
-            room = Aroom;
-            Description = Adescription;
-            Takeable = Atakeable;
-            inInventory = AinInventory;
-        }
-
+        // basic getters and setters for names, desc, etc...
         public string Name
         {
             get { return name; }
@@ -65,6 +51,26 @@ namespace Text_Game
             set { takeable = value; }
         }
 
+        // creating the object(def __init__)
+        public Object(
+            string Aname,
+            string AlongName,
+            rooms Aroom,
+            string Adescription,
+            bool Atakeable,
+            bool AinInventory
+        )
+        {
+            instances.Add(this);
+            Name = Aname;
+            LongName = AlongName;
+            room = Aroom;
+            Description = Adescription;
+            Takeable = Atakeable;
+            inInventory = AinInventory;
+        }
+        // ================= all other stuff ========================
+
         public Object[] GetAll()
         {
             return instances.ToArray();
@@ -83,26 +89,14 @@ namespace Text_Game
             return this;
         }
 
-        public Object GetAllItemsFromInput(
-            string userInput,
+        public Object GetOneItemFromInput(
             Player player,
-            // first one says whether to check, and the second is the rule to check
-            // eg. check for items not in inventory || dont check for items in room
-            Tuple<bool, bool> inventoryFilter, // check, rule
-            Tuple<bool, bool> roomFilter // check, rule
-        ) {
-            List<Object> foundItems = new List<Object>();
-            foreach (Object obj in instances)
-            {
-                if (obj.name == userInput || obj.longName == userInput) {
-                    if (
-                        (inventoryFilter.Item1 && obj.inInventory == inventoryFilter.Item2) ||
-                        (roomFilter.Item1 && obj.room == player.room)
-                    ) {
-                        foundItems.Add(obj);
-                    }
-                }
-            }
+            string userInput,
+            Tuple<bool, bool> invFilter,
+            Tuple<bool, bool> roomFilter
+        )
+        {
+            List<Object> foundItems = GetAllItemsFromInput(player, invFilter, roomFilter, userInput);
 
             if (foundItems.Count == 0)
             {
@@ -111,7 +105,6 @@ namespace Text_Game
             else if (foundItems.Count == 1)
             {
                 return foundItems[0];
-                //Console.WriteLine(foundItems[0].Description);
             }
             else
             {
@@ -125,57 +118,127 @@ namespace Text_Game
                 if (!(foundObject.LongName == "null"))
                 {
                     return foundObject;
-                    //Console.WriteLine(foundObject.Description);
                 }
-                //else { Console.WriteLine(cantSee); }
                 else { return this; }
             }
         }
 
-        public void ActionSorter(string userInput, string action)
+        public List<Object> GetAllItemsFromInput(
+            Player player,
+            // first one says whether to check, and the second is the rule to check
+            // eg. check for items not in inventory || dont check for items in room
+            Tuple<bool, bool> invFilter, // check, rule
+            Tuple<bool, bool> roomFilter, // check, rule
+            string name = "none"
+        )
         {
+            List<Object> foundItems = new List<Object>();
+            List<Object> returnItems = new List<Object>();
 
-        }
-                                                                
-        public void SeeInventory()
-        {
-            //Object[] inventory = new Object[instances.Count];
-            List<Object> inventory = new List<Object>();
-            foreach(Object item in instances)
+            foreach (Object obj in instances)
             {
-                if (item.inInventory)
+                if (!(obj.Name == "null"))
                 {
-                    inventory.Add(item);
+                    if (invFilter.Item1)
+                    {
+                        if ((obj.inInventory == invFilter.Item2) && !foundItems.Contains(obj))
+                        {
+                            foundItems.Add(obj);
+                        }
+                    }
+                    if (roomFilter.Item1)
+                    {
+                        bool roomIsSame = obj.room == player.room;
+                        if ((roomIsSame == roomFilter.Item2)  && !foundItems.Contains(obj))
+                        {
+                            foundItems.Add(obj);
+                        }
+                    }
                 }
             }
-            Console.Write("Your inventory consists of: ");
-            foreach(Object item in inventory)
+            if (name != "none")
             {
-                if (item != inventory.Last())
+                foreach (Object obj in foundItems)
                 {
-                    Console.Write($"{item.LongName}, ");
+                    if (obj.Name == name || obj.LongName == name)
+                    {
+                        returnItems.Add(obj);
+                    }
+                }
+                return returnItems;
+            }
+            return foundItems;
+        }
+
+        public void ActionSorter(Player player, string userInput)
+        {
+            if (userInput.Contains("take"))
+            {
+                userInput = userInput.Replace("take ", "");
+                TakeItem(player, userInput);
+            }
+            else if (userInput.Contains("drop"))
+            {
+                userInput = userInput.Replace("drop ", "");
+                DropItem(player, userInput);
+            }
+        }
+
+        public void DropItem(Player player, string item)
+        {
+            Object itemToDrop = GetOneItemFromInput(player, item, Tuple.Create(true, true), Tuple.Create(true, false));
+
+            if (itemToDrop.Name != "null")
+            {
+                Console.WriteLine($"You have dropped {itemToDrop.LongName}");
+                itemToDrop.inInventory = false;
+                itemToDrop.room = player.room;
+            }
+        }
+
+        public void TakeItem(Player player, string item)
+        {
+            Object itemToTake = GetOneItemFromInput(player, item, Tuple.Create(true, false), Tuple.Create(true, true));
+
+            if (itemToTake.Name != "null")
+            {
+                if (itemToTake.takeable)
+                {
+                    Console.WriteLine($"You have taken {itemToTake.LongName}");
+                    itemToTake.inInventory = true;
+                    itemToTake.room = rooms.inventory;
                 }
                 else
                 {
-                    Console.WriteLine($"and {item.LongName}");
+                    Console.WriteLine($"You are unable to take {itemToTake.LongName}");
                 }
             }
         }
-
-        public void SeeAll()
+                                                                
+        public void SeeInventory(Player player)
         {
-            Console.WriteLine("You can see:");
-            foreach (Object i in instances)
+            List<Object> inventory = GetAllItemsFromInput(player, Tuple.Create(true, true), Tuple.Create(false, false)); ;
+
+            Console.WriteLine("Your inventory consists of: ");
+            if (!Convert.ToBoolean(inventory.Count))
             {
-                if (!(i.Name == "null"))
-                {
-                    Console.WriteLine(i.LongName);
-                }
+                Console.WriteLine("Nothing yet...");
+            }
+            foreach(Object item in inventory) { Console.WriteLine(item.LongName); }
+        }
+
+        public void SeeAll(Player player)
+        {
+            List<Object> roomItems = GetAllItemsFromInput(player, Tuple.Create(true, false), Tuple.Create(true, true));
+            Console.WriteLine("You can see:");
+            foreach (Object i in roomItems)
+            {
+                Console.WriteLine(i.LongName);
             }
         }
 
         //look at object based on name
-        public void LookAtItem(string userInput)
+        public void LookAtItem(Player player, string userInput)
         {
             //removing 'look at' from userInput
             string[] charToRemove = { "look", "at" };
@@ -187,43 +250,21 @@ namespace Text_Game
                 }
             }
             userInput = userInput.Trim();
+            //Console.WriteLine("--------------------------------------------");
+            //Console.WriteLine(userInput);
+            //Console.WriteLine("--------------------------------------------");
 
-            List<Object> foundItems = new List<Object>();
-            foreach (Object obj in instances)
+            Object oneItem = GetOneItemFromInput(player, userInput, Tuple.Create(true, true), Tuple.Create(true, true));
+            if (!(oneItem.Name == "null"))
             {
-                if (obj.name == userInput || obj.longName == userInput)
-                {
-                    foundItems.Add(obj);
-                }
+                Console.WriteLine(oneItem.Description);
             }
-            if (foundItems.Count == 0)
-            {
-                Console.WriteLine(cantSee);
-            }
-            else if (foundItems.Count == 1)
-            {
-                Console.WriteLine(foundItems[0].Description);
-            }
-            else
-            {
-                Console.WriteLine("Which did you mean?");
-                foreach (Object thing in foundItems)
-                {
-                    Console.WriteLine(thing.LongName);
-                }
-                string userChoice = Console.ReadLine();
-                Object foundObject = GetItemByName(userChoice);
-                if (!(foundObject.LongName == "null"))
-                {
-                    Console.WriteLine(foundObject.Description);
-                }
-                else { Console.WriteLine(cantSee); }
-            }
+            else { Console.WriteLine(cantSee); }
         }
     }
 
     internal class Player
     {
-        public string room = "first";
+        public rooms room = rooms.first;
     }
 }
