@@ -3,6 +3,8 @@
 // started - 11/28/2022
 
 using System;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 //using System.Linq;
 //using System.Collections.Generic;
 //using System.Text;
@@ -30,6 +32,7 @@ namespace Text_Game
         static void Main(string[] args)
         {
             //Startup();
+            Console.Title = "Text Game Engine";
             Player player = new Player();
             Object thing = CreateAllObjects();
             Room room = CreateAllRooms();
@@ -37,7 +40,7 @@ namespace Text_Game
             bool running = true;
             while (running)
             {
-                GetInput(thing, player);
+                GetInput(thing, player, room);
                 Console.WriteLine("");
             }
 
@@ -49,17 +52,13 @@ namespace Text_Game
             switch (type)
             {
                 case feedbackTypes.danger:
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(message);
-                    Console.BackgroundColor = ConsoleColor.Black;
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
                 case feedbackTypes.success:
-                    Console.BackgroundColor = ConsoleColor.Green;
-                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine(message);
-                    Console.BackgroundColor = ConsoleColor.Black;
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }
@@ -80,13 +79,14 @@ namespace Text_Game
                 //keys
             new Object("key", "large gold key", rooms.inventory, "This is a large gold key", true, false);
             new Object("key", "small copper key", rooms.inventory, "This is a small copper key", true, false);
-            new Object("key", "jade key", rooms.inventory, "This is a fancy jade key", false, false);
+            new Object("key", "jade key", rooms.inventory, "This is a fancy jade key", true, false);
                 //chairs
             new Object("chair", "metal folding chair", rooms.first, "This is a metal folding chair", false, false);
 
             //second room
             //  add items here
             //==========================================================================
+
             // window into all objects
             return new Object("null", "null", rooms.none, "null", false, false);
         }
@@ -94,6 +94,22 @@ namespace Text_Game
         static void Startup()
         {
             Console.WriteLine("Welcome to 'Text Game Engine'");
+        }
+
+        static void animateTitle()
+        {
+            string Progresbar = "This is animated title of Console";
+            var title = "";
+            while (true)
+            {
+                for (int i = 0; i < Progresbar.Length; i++)
+                {
+                    title += Progresbar[i];
+                    Console.Title = title;
+                    Thread.Sleep(100);
+                }
+                title = "";
+            }
         }
 
         static void seeInput(string[] splitUserInput)
@@ -107,7 +123,14 @@ namespace Text_Game
             Console.WriteLine(splitUserInput.Length);
         }
 
-        static void GetInput(Object thing, Player player)
+        static void LookAtRoom(Player player, Room room)
+        {
+            Room playerRoom = room.GetOneRoomByID(player);
+            Console.WriteLine($"===================={playerRoom.Name}=====================");
+            Console.WriteLine($"{playerRoom.Description}\n");
+        }
+
+        static void GetInput(Object thing, Player player, Room room)
         {
             Console.Write(">> ");
             string userInput = Console.ReadLine().ToLower();
@@ -131,6 +154,9 @@ namespace Text_Game
                     if (splitUserInput[0] == "look" && splitUserInput[1] == "at")
                     {
                         if (splitUserInput[2] == "items") { thing.SeeAll(player); }
+
+                        else if (splitUserInput[2] == "room") { LookAtRoom(player, room); }
+
                         else { thing.LookAtItem(player, userInput); }
                     }
                 }
@@ -138,8 +164,8 @@ namespace Text_Game
                 {
                     if (userInput == "test")
                     {
-                        //CreateFeedback(feedbackTypes.danger, "wow this is a test");
-                        //CreateFeedback(feedbackTypes.success, "wow this is a test");
+                        CreateFeedback(feedbackTypes.danger, "A very bad quack might jinx zippy fowls");
+                        CreateFeedback(feedbackTypes.success, "A very bad quack might jinx zippy fowls");
                         //ConsoleColor[] consoleColors = (ConsoleColor[])ConsoleColor.GetValues(typeof(ConsoleColor));
 
                         //Console.WriteLine("List of available Console Colors:");
@@ -148,7 +174,9 @@ namespace Text_Game
                     }
                     if (userInput == "look")
                     {
-                        Console.WriteLine("Nothing much to see...");
+                        LookAtRoom(player, room);
+                        thing.SeeAll(player);
+                        //Console.WriteLine("Nothing much to see...");
                     }
                     if (userInput == "inventory")
                     {

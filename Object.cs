@@ -93,10 +93,11 @@ namespace Text_Game
             Player player,
             string userInput,
             Tuple<bool, bool> invFilter,
-            Tuple<bool, bool> roomFilter
+            Tuple<bool, bool> roomFilter,
+            Tuple<bool, bool> takeableFilter
         )
         {
-            List<Object> foundItems = GetAllItemsFromInput(player, invFilter, roomFilter, userInput);
+            List<Object> foundItems = GetAllItemsFromInput(player, invFilter, roomFilter, takeableFilter, userInput);
 
             if (foundItems.Count == 0)
             {
@@ -129,6 +130,7 @@ namespace Text_Game
             // eg. check for items not in inventory || dont check for items in room
             Tuple<bool, bool> invFilter, // check, rule
             Tuple<bool, bool> roomFilter, // check, rule
+            Tuple<bool, bool> takeableFilter,
             string name = "none"
         )
         {
@@ -150,6 +152,13 @@ namespace Text_Game
                     {
                         bool roomIsSame = obj.room == player.room;
                         if ((roomIsSame == roomFilter.Item2)  && !foundItems.Contains(obj))
+                        {
+                            foundItems.Add(obj);
+                        }
+                    }
+                    if (takeableFilter.Item1)
+                    {
+                        if ((obj.takeable == takeableFilter.Item2) && !foundItems.Contains(obj))
                         {
                             foundItems.Add(obj);
                         }
@@ -186,11 +195,11 @@ namespace Text_Game
 
         public void DropItem(Player player, string item)
         {
-            Object itemToDrop = GetOneItemFromInput(player, item, Tuple.Create(true, true), Tuple.Create(true, false));
+            Object itemToDrop = GetOneItemFromInput(player, item, Tuple.Create(true, true), Tuple.Create(true, false), Tuple.Create(true, true));
 
             if (itemToDrop.Name != "null")
             {
-                Console.WriteLine($"You have dropped {itemToDrop.LongName}");
+                Console.WriteLine($"\nYou have dropped {itemToDrop.LongName}");
                 itemToDrop.inInventory = false;
                 itemToDrop.room = player.room;
             }
@@ -198,13 +207,13 @@ namespace Text_Game
 
         public void TakeItem(Player player, string item)
         {
-            Object itemToTake = GetOneItemFromInput(player, item, Tuple.Create(true, false), Tuple.Create(true, true));
+            Object itemToTake = GetOneItemFromInput(player, item, Tuple.Create(true, false), Tuple.Create(true, true), Tuple.Create(true, true));
 
             if (itemToTake.Name != "null")
             {
                 if (itemToTake.takeable)
                 {
-                    Console.WriteLine($"You have taken {itemToTake.LongName}");
+                    Console.WriteLine($"\nYou have taken {itemToTake.LongName}");
                     itemToTake.inInventory = true;
                     itemToTake.room = rooms.inventory;
                 }
@@ -217,7 +226,7 @@ namespace Text_Game
                                                                 
         public void SeeInventory(Player player)
         {
-            List<Object> inventory = GetAllItemsFromInput(player, Tuple.Create(true, true), Tuple.Create(false, false)); ;
+            List<Object> inventory = GetAllItemsFromInput(player, Tuple.Create(true, true), Tuple.Create(false, false), Tuple.Create(false, false));
 
             Console.WriteLine("Your inventory consists of: ");
             if (!Convert.ToBoolean(inventory.Count))
@@ -229,7 +238,7 @@ namespace Text_Game
 
         public void SeeAll(Player player)
         {
-            List<Object> roomItems = GetAllItemsFromInput(player, Tuple.Create(true, false), Tuple.Create(true, true));
+            List<Object> roomItems = GetAllItemsFromInput(player, Tuple.Create(true, false), Tuple.Create(true, true), Tuple.Create(true, true));
             Console.WriteLine("You can see:");
             foreach (Object i in roomItems)
             {
@@ -254,7 +263,7 @@ namespace Text_Game
             //Console.WriteLine(userInput);
             //Console.WriteLine("--------------------------------------------");
 
-            Object oneItem = GetOneItemFromInput(player, userInput, Tuple.Create(true, true), Tuple.Create(true, true));
+            Object oneItem = GetOneItemFromInput(player, userInput, Tuple.Create(true, true), Tuple.Create(true, true), Tuple.Create(true, true));
             if (!(oneItem.Name == "null"))
             {
                 Console.WriteLine(oneItem.Description);
